@@ -19,21 +19,19 @@ class ViewController: UIViewController {
     var totalTime = 0
     var timer = Timer()
     var audioPlayer: AVAudioPlayer?
+    var hardnessForAlert: String = ""
     
     
     @IBAction func hardnessCelected(_ sender: UIButton) {
         
+        let hardness = sender.currentTitle ?? "user did not select"
+        hardnessForAlert = sender.currentTitle ?? "best"
         progressBar.progress = 0
         secondsPassed = 0
         titleLabel.text = "Cooking \(sender.currentTitle ?? "choose a hardness") egg..."
         
-        
         timer.invalidate()
-        
-        let hardness = sender.currentTitle ?? "user did not select"
-        
         totalTime = eggTimes[hardness] ?? 0
-        
         timer = Timer.scheduledTimer(
             timeInterval: 1.0,
             target: self,
@@ -43,6 +41,8 @@ class ViewController: UIViewController {
         )
     }
     
+
+    
     @objc func updateTimer() {
         if secondsPassed <= totalTime {
             progressBar.progress = Float(secondsPassed) / Float(totalTime)
@@ -50,10 +50,10 @@ class ViewController: UIViewController {
         } else {
             timer.invalidate()
             titleLabel.text = "Done!"
-            playSound()
+            //playSound()
             let alertController = UIAlertController(
                 title: "Congratulations!",
-                message: "Your egg is ready!",
+                message: "Your \(hardnessForAlert) egg is ready!",
                 preferredStyle: .alert
             )
             let alertAction = UIAlertAction(
