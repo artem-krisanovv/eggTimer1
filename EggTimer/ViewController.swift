@@ -17,10 +17,19 @@ class ViewController: UIViewController {
     let eggTimes = ["Soft": 3, "Medium": 420, "Hard": 600]
     var secondsPassed = 0
     var totalTime = 0
-    var timer = Timer()
     var audioPlayer: AVAudioPlayer?
     var hardnessForAlert: String = ""
     
+    private lazy var timer: Timer = {
+            let timer = Timer(
+                timeInterval: 1.0,
+                target: self,
+                selector: #selector(updateTimer),
+                userInfo: nil,
+                repeats: true
+            )
+            return timer
+    }()
     
     @IBAction func hardnessCelected(_ sender: UIButton) {
         
@@ -32,16 +41,16 @@ class ViewController: UIViewController {
         
         timer.invalidate()
         totalTime = eggTimes[hardness] ?? 0
-        timer = Timer.scheduledTimer(
-            timeInterval: 1.0,
-            target: self,
-            selector: #selector(updateTimer),
-            userInfo: nil,
-            repeats: true
-        )
+        
+        timer = Timer(
+                    timeInterval: 1.0,
+                    target: self,
+                    selector: #selector(updateTimer),
+                    userInfo: nil,
+                    repeats: true
+                )
+        RunLoop.current.add(timer, forMode: .common)
     }
-    
-
     
     @objc func updateTimer() {
         if secondsPassed <= totalTime {
@@ -50,30 +59,22 @@ class ViewController: UIViewController {
         } else {
             timer.invalidate()
             titleLabel.text = "Done!"
-            //playSound()
-            let alertController = UIAlertController(
-                title: "Congratulations!",
-                message: "Your \(hardnessForAlert) egg is ready!",
-                preferredStyle: .alert
-            )
-            let alertAction = UIAlertAction(
-                title: "OK",
-                style: .default
-            ) { (alertAction) in
-                print("OK button tapped")
-            }
-            alertController.addAction(alertAction)
-            present(alertController, animated: true)
+            playSound()
+            showAlert(title: "Congratulations!", message: "Your \(hardnessForAlert) egg is ready!")
         }
-        
     }
     
     func playSound() {
-        if let url = Bundle.main.url(forResource: "alarm_sound", withExtension: "mp3") {
-            if let player = try? AVAudioPlayer(contentsOf: url) {
-                audioPlayer = player
+            if let url = Bundle.main.url(forResource: "alarm_sound", withExtension: "mp3") {
+                audioPlayer = try? AVAudioPlayer(contentsOf: url)
                 audioPlayer?.play()
             }
-        }
     }
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default)
+        alert.addAction(okAction)
+        present(alert, animated: true)
+        }
 }
